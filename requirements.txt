@@ -1,0 +1,19 @@
+# Core dependencies
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-dotenv==1.0.0
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# LLM provider
+groq==0.4.2
+
+# Retry logic
+tenacity==8.2.3
+
+# Manim (animation library)
+manim==0.18.0
+
+# Additional utilities
+python-multipart==0.0.6
+aiofiles==23.2.1
