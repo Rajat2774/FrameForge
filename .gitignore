@@ -1,14 +1,46 @@
-node_modules/
-frontend/dist/
-frontend/build/
-frontend/.vite/
 
-# Manim
-media/
-videos/
-images/
-texts/
+.DS_Store
+Thumbs.db
+
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+.venv/
+venv/
+env/
+.anim/
+
+build/
+dist/
+*.egg-info/
+
 
 .env
+.env.*
+!.env.example
 
-.anim/
+
+*.log
+
+runtime/
+runtime/temp/
+runtime/outputs/
+
+
+node_modules/
+dist/
+.vite/
+
+
+.vscode/
+.idea/
+
+.coverage
+htmlcov/
+pytest_cache/
+
+
+.supabase/
