@@ -988,15 +988,14 @@ export default function App() {
       <DotPattern
         dotSize={2}
         gap={26}
-        baseColor="#2a2a3a" /* dark dots on black backdrop */
-        glowColor="#00ff99" /* cyan‑green when hovering/mouse‑near */
+        baseColor="#2a2a3a" 
+        glowColor="#00ff99" 
         proximity={130}
         glowIntensity={1.1}
         waveSpeed={0.4}
         className=""
       />
 
-      {/* ── App shell (sits above DotPattern via stacking context) ───── */}
       <div
         style={{
           minHeight: "100vh",
@@ -1029,14 +1028,12 @@ export default function App() {
               >
                 <h1
                   style={{
-                    // keep the clamp but reduce upper bound and ensure wrapping doesn't overflow
                     fontSize: "clamp(60px, 10vw, 90px)",
                     fontWeight: 900,
                     letterSpacing: "-0.04em",
                     marginBottom: 18,
                     lineHeight: 1.0,
                     maxWidth: "100%",
-                    // allow breaking if necessary
                     whiteSpace: "normal",
                     wordBreak: "break-word",
                     overflowWrap: "break-word",
@@ -1655,17 +1652,12 @@ export default function App() {
                 </div>
               </div>
             )}
-
-            {/* ── Community Section (always visible below) ──────────────── */}
             <CommunitySection refreshKey={communityRefreshKey} />
-
-            {/* ── Capabilities Overview (added below community feed) ───── */}
             <CapabilitiesSection />
             <UseCasesSection />
           </div>
         </main>
 
-        {/* ── Footer ─────────────────────────────────────────────────────── */}
         <Footer />
 
         {/* ── Post Modal ─────────────────────────────────────────────────── */}
