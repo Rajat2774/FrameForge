@@ -372,5 +372,5 @@ MIT — see [LICENSE](LICENSE) for details.
 ---
 
 <div align="center">
-  <sub>Built with Manim, FastAPI, React, and Groq · Made by Sumit Singh</sub>
+  <sub>Built with Manim, FastAPI, React, and Groq · Made by Rajat Singh</sub>
 </div>
