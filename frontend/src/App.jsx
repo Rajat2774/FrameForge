@@ -129,6 +129,15 @@ function PostModal({ videoUrl, prompt, onClose, onSuccess }) {
   const [submitting, setSubmitting] = useState(false);
   const [err, setErr] = useState("");
 
+  // prevent background from scrolling while modal is open
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name.trim()) return setErr("Name is required.");
@@ -182,6 +191,7 @@ function PostModal({ videoUrl, prompt, onClose, onSuccess }) {
         style={{
           width: "100%",
           maxWidth: 520,
+          maxHeight: "calc(100vh - 40px)",
           background: "rgba(14,16,26,0.97)",
           border: "1px solid rgba(33,198,143,0.25)",
           borderRadius: 20,
@@ -189,6 +199,7 @@ function PostModal({ videoUrl, prompt, onClose, onSuccess }) {
             "0 24px 80px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.04)",
           padding: 32,
           animation: "slideUp .35s cubic-bezier(.34,1.56,.64,1) both",
+          overflowY: "auto",
         }}
       >
         {/* Modal Header */}
@@ -988,8 +999,8 @@ export default function App() {
       <DotPattern
         dotSize={2}
         gap={26}
-        baseColor="#2a2a3a" 
-        glowColor="#00ff99" 
+        baseColor="#2a2a3a"
+        glowColor="#00ff99"
         proximity={130}
         glowIntensity={1.1}
         waveSpeed={0.4}
