@@ -3,6 +3,8 @@ import axios from "axios";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import DotPattern from "./components/DotPattern";
+import CapabilitiesSection from "./components/Capabilities";
+import UseCasesSection from "./components/UseCasesSection";
 
 const API = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
@@ -206,7 +208,7 @@ function PostModal({ videoUrl, prompt, onClose, onSuccess }) {
                 letterSpacing: "-0.02em",
               }}
             >
-              Share to Community 
+              Share to Community
             </h2>
             <p style={{ fontSize: 13, color: "var(--text-dim)", marginTop: 4 }}>
               Post your animation for everyone to see
@@ -637,7 +639,7 @@ function CommunitySection({ refreshKey }) {
   }, [fetchPosts, refreshKey]);
 
   return (
-    <section style={{ width: "100%", marginTop: 64, paddingBottom: 64 }}>
+    <section style={{ width: "100%", marginTop: 96, paddingBottom: 64 }}>
       {/* Section Header */}
       <div
         style={{
@@ -1027,14 +1029,20 @@ export default function App() {
               >
                 <h1
                   style={{
-                    fontSize: "clamp(80px, 12vw, 120px)",
+                    // keep the clamp but reduce upper bound and ensure wrapping doesn't overflow
+                    fontSize: "clamp(60px, 10vw, 90px)",
                     fontWeight: 900,
                     letterSpacing: "-0.04em",
                     marginBottom: 18,
                     lineHeight: 1.0,
+                    maxWidth: "100%",
+                    // allow breaking if necessary
+                    whiteSpace: "normal",
+                    wordBreak: "break-word",
+                    overflowWrap: "break-word",
                   }}
                 >
-                  <span className="logo-grad">FrameForge</span>
+                  <span className="logo-grad">Frame Forge</span>
                 </h1>
                 <p
                   style={{
@@ -1650,6 +1658,10 @@ export default function App() {
 
             {/* ── Community Section (always visible below) ──────────────── */}
             <CommunitySection refreshKey={communityRefreshKey} />
+
+            {/* ── Capabilities Overview (added below community feed) ───── */}
+            <CapabilitiesSection />
+            <UseCasesSection />
           </div>
         </main>
 
