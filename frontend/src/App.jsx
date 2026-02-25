@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
+import { Analytics } from "@vercel/analytics/react";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import DotPattern from "./components/DotPattern";
@@ -479,7 +480,7 @@ function PostModal({ videoUrl, prompt, onClose, onSuccess }) {
   );
 }
 
-/* ══════════════════════════════════════════════════════════
+/* ════════════════════════════════���═════════════════════════
    Community Post Card
 ══════════════════════════════════════════════════════════ */
 function PostCard({ post }) {
@@ -992,7 +993,7 @@ export default function App() {
     setCommunityRefreshKey((k) => k + 1);
   };
 
-  /* ─── JSX ───────────────────────────────────────────────────────────── */
+  /* ─── JSX ��───────────────��──────────────────────────────────────────── */
   return (
     <>
       {/* ── Dot-pattern fixed background ─────────────────────────────── */}
@@ -1690,6 +1691,7 @@ export default function App() {
           />
         )}
       </div>
+      <Analytics />
     </>
   );
 }
