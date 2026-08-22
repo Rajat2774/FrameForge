@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+python-dotenv
+pydantic
+pydantic-settings
+groq
+tenacity
+manim==0.19.0
+supabase
+httpx
+python-multipart
+aiofiles

@@ -265,24 +265,31 @@ async def _llm_confirms_template(prompt: str, template_desc: str, groq_client) -
     """Ask the LLM if the prompt genuinely matches the template intent."""
     try:
         response = groq_client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[{
-                "role": "user",
-                "content": (
-                    f'Does this user request match this template?\n'
-                    f'User request: "{prompt}"\n'
-                    f'Template: "{template_desc}"\n'
-                    f'Reply with only YES or NO.'
-                )
-            }],
+            model="qwen/qwen3.6-27b",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a concise prompt classifier. Reply ONLY with YES or NO. No explanations or thinking blocks."
+                },
+                {
+                    "role": "user",
+                    "content": f'User request: "{prompt}"\nTemplate description: "{template_desc}"\nDoes the request match this template intent? Reply YES or NO.'
+                }
+            ],
             temperature=0,
-            max_tokens=5,
+            max_tokens=250,
         )
-        answer = response.choices[0].message.content.strip().upper()
-        logger.info(f"[TEMPLATE_MANAGER] LLM confirmation for '{template_desc}': {answer}")
-        return answer == "YES"
+        content = response.choices[0].message.content
+        # Remove thinking blocks if present
+        clean_text = re.sub(r"<think>.*?</think>", "", content, flags=re.DOTALL).strip()
+        if "</think>" in clean_text:
+            clean_text = clean_text.split("</think>")[-1].strip()
+
+        answer = clean_text.upper()
+        logger.info(f"[TEMPLATE_MANAGER] LLM confirmation response for '{template_desc}': {repr(clean_text)}")
+        return "YES" in answer or "NO" not in answer
     except Exception as e:
-        logger.warning(f"[TEMPLATE_MANAGER] LLM confirmation failed: {e} — defaulting to template")
+        logger.warning(f"[TEMPLATE_MANAGER] LLM confirmation failed: {e} — defaulting to keyword match")
         return True
 
 

@@ -104,7 +104,7 @@ class Settings(BaseSettings):
 
     # API Configuration
     groq_api_key: str = Field(..., validation_alias="GROQ_API_KEY")
-    groq_model: str = Field(default="llama-3.3-70b-versatile", validation_alias="GROQ_MODEL")
+    groq_model: str = Field(default="qwen/qwen3.6-27b", validation_alias="GROQ_MODEL")
 
     # Server Configuration
     host: str = Field(default="0.0.0.0", validation_alias="HOST")

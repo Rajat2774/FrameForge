@@ -1,4 +1,5 @@
 import os
+# pyrefly: ignore [missing-import]
 from groq import Groq
 from dotenv import load_dotenv
 import re
@@ -249,7 +250,7 @@ MathTex(r"\\alpha") for Greek letters
 === YOUR TASK ===
 Generate ONLY the Python code. Start immediately with "from manim import *". No other text."""
 
-    def __init__(self, api_key: Optional[str] = None, model: str = "llama-3.3-70b-versatile", allow_latex: bool = True):
+    def __init__(self, api_key: Optional[str] = None, model: str = "qwen/qwen3.6-27b", allow_latex: bool = True):
         self.api_key = api_key or os.getenv("GROQ_API_KEY")
         if not self.api_key:
             raise ManimCodeGeneratorError("GROQ_API_KEY not found in environment")
@@ -273,7 +274,7 @@ Generate ONLY the Python code. Start immediately with "from manim import *". No 
     )
     def generate(self, user_prompt: str, temperature: float = 0.2) -> str:
         """
-        Generate Manim code from user prompt with retry logic.
+        Generate Manim code from user prompt with retry logic and model fallback.
         Raises ManimCodeGeneratorError on failure.
         """
         if not user_prompt or not user_prompt.strip():
@@ -282,31 +283,47 @@ Generate ONLY the Python code. Start immediately with "from manim import *". No 
         logger.info(f"[GENERATE] Starting code generation | prompt='{user_prompt[:100]}'")
         logger.info(f"[GENERATE] Using model={self.model} | temperature={temperature} | max_tokens=4000")
 
+        target_model = self.model
         try:
-            logger.info("[GENERATE] Sending request to Groq API...")
+            return self._call_groq_api(user_prompt, target_model, temperature)
+        except Exception as e:
+            err_str = str(e).lower()
+            if ("404" in err_str or "model_not_found" in err_str or "does not exist" in err_str) and target_model != "qwen/qwen3.6-27b":
+                logger.warning(f"[GENERATE] Model '{target_model}' unavailable (404/model_not_found). Falling back to 'qwen/qwen3.6-27b'")
+                self.model = "qwen/qwen3.6-27b"
+                return self._call_groq_api(user_prompt, "qwen/qwen3.6-27b", temperature)
+            raise
+
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=2, max=10),
+        retry=retry_if_exception_type(Exception),
+        reraise=True
+    )
+    def _call_groq_api(self, user_prompt: str, model_name: str, temperature: float) -> str:
+        try:
+            logger.info(f"[GENERATE] Sending request to Groq API using model '{model_name}'...")
             response = self.client.chat.completions.create(
-                model=self.model,
+                model=model_name,
                 messages=[
                     {"role": "system", "content": self.SYSTEM_PROMPT},
                     {"role": "user", "content": user_prompt}
                 ],
                 temperature=temperature,
-                max_tokens=4000  # FIX: Was 2000 — too low for complex scenes, caused mid-code truncation
+                max_tokens=4000
             )
             logger.info("[GENERATE] Groq API responded successfully")
 
             content = response.choices[0].message.content
             logger.info(f"[GENERATE] Raw response length: {len(content)} chars")
-            logger.debug(f"[GENERATE] Raw response (first 300 chars): {content[:300]}")
 
-            # Clean markdown artifacts
+            # Clean markdown artifacts and thinking blocks
             content = self._clean_code(content)
             logger.info(f"[GENERATE] After cleaning: {len(content)} chars")
 
-            # FIX: Validate the output before returning — catch bad LLM output early
+            # Validate structural correctness
             self._validate_code(content)
 
-            # Log the extracted class name so render issues are easier to trace
             class_name = self._extract_class_name(content)
             logger.info(f"[GENERATE] Extracted Scene class name: '{class_name}'")
             logger.info(f"[GENERATE] Code generation complete ✓")
@@ -314,31 +331,43 @@ Generate ONLY the Python code. Start immediately with "from manim import *". No 
             return content
 
         except ManimCodeGeneratorError:
-            # Re-raise validation errors directly without wrapping
             raise
         except Exception as e:
-            # FIX: Log the original exception type and message before wrapping
-            logger.error(f"[GENERATE] Groq API call failed | error_type={type(e).__name__} | error={str(e)}")
+            logger.error(f"[GENERATE] Groq API call failed | model={model_name} | error_type={type(e).__name__} | error={str(e)}")
             raise ManimCodeGeneratorError(f"Failed to generate code: {str(e)}") from e
 
     def _clean_code(self, code: str) -> str:
-        """Remove markdown artifacts and stray text from generated code."""
-        logger.debug("[CLEAN] Stripping markdown artifacts...")
+        """Remove markdown artifacts, thinking blocks, and stray text from generated code."""
+        logger.debug("[CLEAN] Cleaning generated output...")
 
-        # FIX: Strip everything before 'from manim import *' first —
-        # catches cases where the model prepends an explanation sentence
-        manim_import_match = re.search(r"(from manim import \*)", code)
-        if manim_import_match:
-            code = code[manim_import_match.start():]
-            logger.debug("[CLEAN] Trimmed leading non-code content before 'from manim import *'")
+        # 1. Remove thinking/reasoning blocks (e.g. DeepSeek / Qwen <think>...</think>)
+        code = re.sub(r"<think>.*?</think>", "", code, flags=re.DOTALL)
+        if "</think>" in code:
+            code = code.split("</think>")[-1]
+
+        # 2. Extract code inside ```python ... ``` or ``` ... ``` code blocks if present
+        blocks = re.findall(r"```(?:python)?\s*(.*?)\s*```", code, flags=re.DOTALL)
+        if blocks:
+            code = max(blocks, key=len)
         else:
-            logger.warning("[CLEAN] 'from manim import *' not found in raw output — code may be malformed")
+            # 3. Locate 'from manim import *' preceding a Scene class definition
+            matches = list(re.finditer(r"from manim import \*", code))
+            if matches:
+                chosen_start = matches[0].start()
+                for m in matches:
+                    rest = code[m.start():]
+                    if re.search(r"class\s+\w+\s*\(\s*(?:\w*\.)?Scene\s*\):", rest):
+                        chosen_start = m.start()
+                        break
+                code = code[chosen_start:]
+            else:
+                logger.warning("[CLEAN] 'from manim import *' not found in raw output")
 
-        # Remove any trailing markdown closing fences
+        # 4. Remove any trailing markdown closing fences
         code = re.sub(r"```[\w]*\s*$", "", code, flags=re.MULTILINE)
         code = re.sub(r"```", "", code)
 
-        # Remove common prose suffixes the model sometimes appends
+        # 5. Remove common prose suffixes
         code = re.sub(r"\n(This code|Note:|The above|Here,|In this).*$", "", code, flags=re.DOTALL | re.IGNORECASE)
 
         return code.strip()

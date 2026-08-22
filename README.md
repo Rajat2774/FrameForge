@@ -6,7 +6,7 @@
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=flat-square&logo=fastapi&logoColor=white)
 ![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=white)
 ![Manim](https://img.shields.io/badge/Manim-0.19.0-FF6B6B?style=flat-square)
-![Groq](https://img.shields.io/badge/LLM-Groq_Llama_3.3-F54F29?style=flat-square)
+![Groq](https://img.shields.io/badge/LLM-Groq_Qwen_3.6-F54F29?style=flat-square)
 ![Supabase](https://img.shields.io/badge/Storage-Supabase-3ECF8E?style=flat-square&logo=supabase&logoColor=white)
 
 ---
@@ -47,7 +47,7 @@ User Prompt
                ▼
 ┌─────────────────────────────────────────────┐
 │           LLM Code Generator               │
-│  Groq Llama 3.3 70B → Manim Python code    │
+│  Groq Qwen 3.6 27B → Manim Python code    │
 └──────────────┬──────────────────────────────┘
                │
                ▼
@@ -84,7 +84,7 @@ User Prompt
 |-------|-----------|
 | Frontend | React 18, Vite, Axios |
 | Backend | FastAPI, Python 3.9 |
-| LLM | Groq API — Llama 3.3 70B |
+| LLM | Groq API — Qwen 3.6 27B |
 | Animation | Manim Community v0.19.0 |
 | Storage | Supabase Storage |
 | Database | Supabase (community posts) |
@@ -242,7 +242,7 @@ All settings are loaded from environment variables via `config.py`:
 | `ALLOW_LATEX` | `false` | Enable LaTeX / MathTex rendering |
 | `RENDER_TIMEOUT` | `120` | Max seconds for Manim to render |
 | `MANIM_QUALITY` | `l` | Quality: `l` (480p), `m` (720p), `h` (1080p) |
-| `LLM_MODEL` | `llama-3.3-70b-versatile` | Groq model identifier |
+| `LLM_MODEL` | `qwen/qwen3.6-27b` | Groq model identifier |
 | `LLM_MAX_TOKENS` | `2048` | Max tokens for code generation |
 
 ---
